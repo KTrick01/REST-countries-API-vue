@@ -148,7 +148,7 @@ onMounted(() => {
 				</picture>
 				<div class="countries__data">
 					<h2>{{ country.name.common }}</h2>
-					<p><span class="bold">Population: </span>{{ country.population }}</p>
+					<p><span class="bold">Population: </span>{{ country.population.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') }}</p>
 					<p><span class="bold">Region:</span> {{ country.region }}</p>
 					<p><span class="bold">Capital:</span> {{ country.capital?.[0] }}</p>
 				</div>
