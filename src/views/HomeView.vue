@@ -79,7 +79,7 @@ onMounted(() => {
 							<input
 								@click="Region('Africa')"
 								type="radio"
-								id="America"
+								id="Africa"
 								name="region"
 							/>
 						</label>
