@@ -1,5 +1,10 @@
 <script setup>
 import HeaderComponent from './components/HeaderComponent.vue';
+import { useCounterStore } from './stores/counter';
+const {AllCountries} = useCounterStore()
+setTimeout(() => {
+	console.log(AllCountries)
+}, 1000);
 </script>
 
 <template>
@@ -7,9 +12,7 @@ import HeaderComponent from './components/HeaderComponent.vue';
 
 	<main>
 		<RouterView v-slot="{ Component }">
-			<transition name="route" mode="out-in">
-				<component :is="Component"></component>
-			</transition>
+			<component :is="Component"></component>
 		</RouterView>
 	</main>
 </template>
@@ -23,6 +26,8 @@ import HeaderComponent from './components/HeaderComponent.vue';
 	box-sizing: border-box;
 	list-style: none;
 	text-decoration: none;
+	font-family: 'Nunito Sans', sans-serif;
+
 	color: inherit;
 	--Light-Theme-Bg: hsl(0, 0%, 98%);
 	--Light-Theme-Text: hsl(200, 15%, 8%);
@@ -39,7 +44,6 @@ body {
 }
 
 body {
-	font-family: 'Nunito Sans', sans-serif;
 	font-size: 14px;
 	background-color: var(--Theme-Bg);
 	color: var(--Theme-Text);
@@ -72,23 +76,8 @@ body {
 		background: white !important;
 		transition: all 0.3s;
 	}
-}
-.router-enter-from {
-	opacity: 0;
-	transform: translateX(100px);
-}
-
-.router-enter-active {
-	transition: all 0.3s ease-out;
-}
-
-.router-leave-to {
-	opacity: 0;
-	transform: translateX(-100px);
-}
-.router-leave-active {
-	transition: all 0.3s ease-in;
-}
-@media (prefers-color-scheme: dark) {
+	.error__message {
+		color: rgba(255, 255, 255, 0.514);
+	}
 }
 </style>

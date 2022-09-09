@@ -44,9 +44,9 @@ const toggleDark = useToggle(isDark)
         cursor: pointer;
 
         p {
-            letter-spacing: 2px;
             font-family: inherit;
             font-size: clamp(.7rem, 2vw, 1rem);
+            font-weight: 600;
         }
     }
 

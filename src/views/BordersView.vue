@@ -2,16 +2,35 @@
 import { useGetData } from '../composables/getData';
 import { useRoute, useRouter } from 'vue-router';
 import { RouterLink } from 'vue-router';
+import { ref } from 'vue';
+import axios from 'axios';
 
+const dataBorder = ref([]);
 const route = useRoute();
 const router = useRouter();
 const { data, getData } = useGetData();
+
 function home() {
 	router.push('/');
 }
 getData(
 	`https://restcountries.com/v3.1/alpha/${route.params.borders}?fields=name,capital,population,region,subregion,tld,currencies,languages,nativename,flags,borders`
 );
+
+const getDataBorder = async (url) => {
+	try {
+		const res = await axios.get(url);
+		dataBorder.value = res.data;
+	} catch (error) {
+		console.log(error);
+	}
+};
+getDataBorder('https://restcountries.com/v3.1/all?fields=name,cca3');
+
+const getCountryName = (a3code) => {
+	const country = dataBorder.value.find((c) => c.cca3 === a3code);
+	return country ? country.name.common : '';
+};
 </script>
 <template>
 	<div class="lds-spinner" v-if="!data">
@@ -31,49 +50,47 @@ getData(
 	<section class="details" v-else>
 		<button class="details__back" @click="home()">
 			<i class="fa-solid fa-arrow-left-long"></i>
-			<p>Back</p>
+			Back
 		</button>
 
 		<div class="details__main">
-			<picture class="details__flag-container">
-				<img
-					:src="`${data?.flags.svg}`"
-					:alt="`Flag of ${data?.name.common}`"
-					class="details__flag"
-				/>
-			</picture>
+			<img
+				:src="`${data?.flags.svg}`"
+				:alt="`Flag of ${data?.name.common}`"
+				class="details__flag"
+			/>
 			<div class="details__texts">
 				<h2>{{ data?.name.common }}</h2>
-				<div class="details__data margin">
-					<p>
+				<ul class="details__data margin">
+					<li>
 						<span class="bold">Native Name:</span>
 						{{ Object.values(data?.name.nativeName)[0].common }}
-					</p>
-					<p>
+					</li>
+					<li>
 						<span class="bold">Population:</span>
 						{{
 							data?.population.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 						}}
-					</p>
-					<p><span class="bold">Region:</span> {{ data?.region }}</p>
-					<p><span class="bold">Sub Region:</span> {{ data?.subregion }}</p>
-					<p><span class="bold">Capital:</span> {{ data?.capital[0] }}</p>
-					<p class="margin">
+					</li>
+					<li><span class="bold">Region:</span> {{ data?.region }}</li>
+					<li><span class="bold">Sub Region:</span> {{ data?.subregion }}</li>
+					<li><span class="bold">Capital:</span> {{ data?.capital[0] }}</li>
+					<li class="margin">
 						<span class="bold">Top Level Domain:</span>
 						{{ data?.tld[0] }}
-					</p>
-					<p>
-						<span class="bold cu">Currencies:</span>
+					</li>
+					<li>
+						<span class="bold">Currencies:</span>
 						<template v-for="(item, index) in Object.values(data?.currencies)"
 							>{{ ` ${item.name} ` }}
 						</template>
-					</p>
+					</li>
 
-					<p>
+					<li>
 						<span class="bold">Languages:</span>
 						{{ Object.values(data?.languages).join(', ') }}
-					</p>
-				</div>
+					</li>
+				</ul>
 
 				<div
 					class="details__borders-container margin"
@@ -85,7 +102,7 @@ getData(
 						class="details__borders"
 						v-for="borders in data?.borders"
 					>
-						{{ borders }}
+						{{ getCountryName(borders) }}
 					</RouterLink>
 				</div>
 			</div>
@@ -132,6 +149,8 @@ getData(
 		display: grid;
 		grid-template-columns: 1fr 1fr;
 		gap: 3rem;
+		max-width: max-content;
+		margin: 0 auto;
 	}
 
 	&__flag {

@@ -1,48 +1,59 @@
 <script setup>
 import { useGetData } from '../composables/getData';
-import { onMounted, ref, computed } from 'vue';
+import { ref, watch } from 'vue';
 import { RouterLink } from 'vue-router';
+import { onClickOutside } from '@vueuse/core';
 
 const { data, getData } = useGetData();
 getData(
 	'https://restcountries.com/v3.1/all?fields=name,capital,population,region,flags,cca3'
 );
-
-const search = ref();
-
-const test = ref();
-
+const drop = ref(null);
+const check = ref(null);
+const resetSearch = ref(null);
+const search = ref('');
+const allCountries = ref();
 const postXpage = 20;
 const fin = ref(postXpage);
+
+function resetInput() {
+	search.value = ""
+}
+onClickOutside(drop, () => {
+	check.value.checked = false;
+});
+
 const next = () => {
 	fin.value = fin.value + postXpage;
 };
-
-function Region(region) {
-	test.value = data.value.filter((e) => e.region.includes(region));
+function Region(regionPreference) {
+	allCountries.value = data.value.filter((e) =>
+		e.region.includes(regionPreference)
+	);
 }
+watch(search, (inputText) => {
+	allCountries.value = data.value.filter((item) =>
+		item.name.common
+			.toLowerCase()
+			.replace(/\s+/g, '')
+			.includes(inputText.toLowerCase().replace(/\s+/g, ''))
+	);
 
-onMounted(() => {
-	setTimeout(() => {
-		test.value = data.value;
-	}, 1000);
+	if (search.value.length > 0) {
+		resetSearch.value.style.display ="block"
+	} else {
+		resetSearch.value.style.display ="none"
 
-	setTimeout(() => {
-		search.value.addEventListener('input', (w) => {
-			test.value = data.value.filter((e) =>
-				e.name.common
-					.toLowerCase()
-					.replace(/\s+/g, '')
-					.includes(w.target.value.toLowerCase().replace(/\s+/g, ''))
-			);
-			fin.value = 20;
-		});
-	}, 2500);
+	}
+	fin.value = 20;
+});
+watch(data, () => {
+	allCountries.value = data.value;
 });
 </script>
 
 <template>
-	<div class="lds-spinner" v-if="!test">
+	<div class="lds-spinner" v-if="!allCountries">
 		<div></div>
 		<div></div>
 		<div></div>
@@ -64,12 +75,14 @@ onMounted(() => {
 					type="search"
 					placeholder="Search for a country..."
 					id="search"
-					ref="search"
+					v-model="search"
 				/>
+
+				<i class="fa-solid fa-xmark" ref="resetSearch" @click="resetInput"></i>
 			</label>
 
-			<div class="dropdown-container">
-				<input type="checkbox" name="check" id="check" />
+			<div class="dropdown-container" ref="drop">
+				<input type="checkbox" name="check" id="check" ref="check" />
 				<label for="check" class="regionLabel">Filter by Region</label>
 
 				<div class="dropdown">
@@ -128,33 +141,39 @@ onMounted(() => {
 			</div>
 		</div>
 		<div class="countries">
-			<div class="error" v-if="test.length === 0">
+			<div class="error" v-if="allCountries.length === 0">
 				<h3>NOT FOUND</h3>
 				<i class="fa-regular fa-face-frown-open"></i>
-				<p>Did you spell it correctly?</p>
+				<p class="error__message">Did you spell it correctly?</p>
 			</div>
 			<RouterLink
 				:to="`/${country.cca3}`"
-				v-for="(country, index) in test.slice(0, fin)"
-				class="countries__container"
+				v-for="(country, index) in allCountries.slice(0, fin)"
 				:key="index"
 			>
-				<picture>
+				<article class="countries__container">
 					<img
 						:src="country.flags.svg"
 						:alt="`Flag of ${country.name.common}`"
 						class="countries__flag"
 					/>
-				</picture>
-				<div class="countries__data">
-					<h2>{{ country.name.common }}</h2>
-					<p><span class="bold">Population: </span>{{ country.population.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') }}</p>
-					<p><span class="bold">Region:</span> {{ country.region }}</p>
-					<p><span class="bold">Capital:</span> {{ country.capital?.[0] }}</p>
-				</div>
+					<div class="countries__data">
+						<h2>{{ country.name.common }}</h2>
+						<p>
+							<span class="bold">Population: </span
+							>{{
+								country.population
+									.toString()
+									.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+							}}
+						</p>
+						<p><span class="bold">Region:</span> {{ country.region }}</p>
+						<p><span class="bold">Capital:</span> {{ country.capital?.[0] }}</p>
+					</div>
+				</article>
 			</RouterLink>
 		</div>
-		<button @click="next" class="showBtn" v-if="fin < test.length">
+		<button @click="next" class="showBtn" v-if="fin < allCountries.length">
 			Show more
 			<i class="fa-solid fa-chevron-down"></i>
 		</button>
@@ -182,7 +201,11 @@ $Shadow: 0 0 10px rgba(0, 0, 0, 0.199);
 		color: rgba(0, 0, 0, 0.452);
 	}
 }
-
+.fa-xmark {
+	display: none;
+	cursor: pointer;
+	font-size: 1.3rem;
+}
 .fa-chevron-down {
 	font-size: 2rem;
 	animation: ping 2s ease-in-out infinite both;
@@ -287,6 +310,7 @@ $Shadow: 0 0 10px rgba(0, 0, 0, 0.199);
 	box-shadow: $Shadow;
 	padding: 1.2rem 1rem;
 	cursor: pointer;
+	font-weight: 600;
 
 	&::after {
 		content: '';
@@ -305,7 +329,6 @@ $Shadow: 0 0 10px rgba(0, 0, 0, 0.199);
 	border-radius: $Radius;
 	display: flex;
 	overflow: hidden;
-	justify-content: center;
 	align-items: center;
 	background-color: var(--Light-Theme-Container);
 	width: 30%;
@@ -322,7 +345,7 @@ $Shadow: 0 0 10px rgba(0, 0, 0, 0.199);
 		border: none;
 		font-family: inherit;
 		background-color: inherit;
-
+		width: 100%;
 		&:focus {
 			outline: none;
 		}
