@@ -17,7 +17,7 @@ const postXpage = 20;
 const fin = ref(postXpage);
 
 function resetInput() {
-	search.value = ""
+	search.value = '';
 }
 onClickOutside(drop, () => {
 	check.value.checked = false;
@@ -40,10 +40,9 @@ watch(search, (inputText) => {
 	);
 
 	if (search.value.length > 0) {
-		resetSearch.value.style.display ="block"
+		resetSearch.value.style.display = 'block';
 	} else {
-		resetSearch.value.style.display ="none"
-
+		resetSearch.value.style.display = 'none';
 	}
 	fin.value = 20;
 });
@@ -72,7 +71,7 @@ watch(data, () => {
 			<label class="input-area" for="search">
 				<i class="fa-solid fa-magnifying-glass"></i>
 				<input
-					type="search"
+					type="text"
 					placeholder="Search for a country..."
 					id="search"
 					v-model="search"
@@ -140,12 +139,12 @@ watch(data, () => {
 				</div>
 			</div>
 		</div>
+		<div class="error" v-if="allCountries.length === 0">
+			<h3>NOT FOUND</h3>
+			<i class="fa-regular fa-face-frown-open"></i>
+			<p class="error__message">Did you spell it correctly?</p>
+		</div>
 		<div class="countries">
-			<div class="error" v-if="allCountries.length === 0">
-				<h3>NOT FOUND</h3>
-				<i class="fa-regular fa-face-frown-open"></i>
-				<p class="error__message">Did you spell it correctly?</p>
-			</div>
 			<RouterLink
 				:to="`/${country.cca3}`"
 				v-for="(country, index) in allCountries.slice(0, fin)"
@@ -185,15 +184,13 @@ $Radius: 0.5rem;
 $Shadow: 0 0 10px rgba(0, 0, 0, 0.199);
 
 .error {
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
+	
 	display: flex;
 	justify-content: center;
 	flex-direction: column;
 	align-items: center;
 	font-size: 3rem;
+	text-align: center;
 	gap: 3rem;
 
 	p {
@@ -390,7 +387,7 @@ $Shadow: 0 0 10px rgba(0, 0, 0, 0.199);
 		display: grid;
 		grid-template-rows: 1fr 1fr;
 		background-color: var(--Light-Theme-Container);
-		transition: all 0.3s;
+		transition: background-color 0.3s, transform .3s;
 
 		&:hover {
 			transform: scale(1.05);

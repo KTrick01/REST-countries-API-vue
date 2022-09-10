@@ -1,10 +1,6 @@
 <script setup>
 import HeaderComponent from './components/HeaderComponent.vue';
-import { useCounterStore } from './stores/counter';
-const {AllCountries} = useCounterStore()
-setTimeout(() => {
-	console.log(AllCountries)
-}, 1000);
+
 </script>
 
 <template>
@@ -35,7 +31,7 @@ setTimeout(() => {
 	--Dark-Theme-Bg: #202d36;
 	--Dark-Theme-Text: white;
 	--Dark-Theme-Container: #2b3743;
-	transition: 0.3s all;
+	transition: 0.3s background-color, .3s transform;
 }
 
 html,
